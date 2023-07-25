@@ -1,6 +1,6 @@
 # rclone_crypt_py
 
-[简体中文](README.md),[English](README-en.md)
+[简体中文](README.md), [English](README-en.md)
 
 python实现的针对rclone(crypt storage)的加密/解密
 
@@ -10,9 +10,13 @@ python实现的针对rclone(crypt storage)的加密/解密
 from rclone import Crypt
 # 初始化
 # 分别传入passwd1和passwd2
+
 # 此处的passwd是创建crypt时的密码，而不是rclone配置文件中的密码
 # 若未设置passwd2，可省略第二个参数
 crypt = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
+
+# 若直接传入rclone配置文件中的密码（混淆后的密码），需将passwd_obscured参数设为True
+# crypt = Crypt('SpnX0yEFxpNJjo9bxd3xAlVoXA7F4cr3C0SA-zmfzw', 'ziWH7jKYerB6o5vHnaXAvISTguFD6ZFJFbhT3BlLVQ', True)
 
 # 文件加密/解密
 crypt.File.file_decrypt(input_file_path, output_file_path)

@@ -1,6 +1,6 @@
 # rclone_crypt_py
 
-[简体中文](README.md),[English](README-en.md)
+[简体中文](README.md), [English](README-en.md)
 
 Python implementation of encryption/decryption for rclone (crypt storage)
 
@@ -10,9 +10,13 @@ Python implementation of encryption/decryption for rclone (crypt storage)
 from rclone import Crypt
 # Initialize
 # Pass in passwd1 and passwd2
+
 # The password here is the password for creating the crypt, not the password in the rclone configuration file
 # If passwd2 is not set, the second parameter can be omitted
 crypt = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
+
+# To use passwords directly in the rclone configuration file(obscured password), you should set the passwd_obscured parameter to True.
+# crypt = Crypt('SpnX0yEFxpNJjo9bxd3xAlVoXA7F4cr3C0SA-zmfzw', 'ziWH7jKYerB6o5vHnaXAvISTguFD6ZFJFbhT3BlLVQ', True)
 
 # File encryption/decryption
 crypt.File.file_decrypt(input_file_path, output_file_path)
