@@ -32,7 +32,7 @@ class Crypt:
     :param `salt`: 对应rclone password2, 可不设
     :param `passwd_obscured`: 密码是否经过混淆
     """
-    def __init__(self, passwd: bytes | str, salt: bytes | str = DEFAULT_SALT, passwd_obscured: bool = False) -> None:
+    def __init__(self, passwd: str, salt: str = DEFAULT_SALT, passwd_obscured: bool = False) -> None:
         if type(passwd) == str:
             passwd = bytes(passwd, 'utf-8')
         if passwd_obscured:

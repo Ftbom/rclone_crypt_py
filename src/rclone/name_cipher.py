@@ -14,6 +14,12 @@ class Name:
         self.__nameKey = nameKey
         self.__nameTweak = nameTweak
         self.__cipher = aes_cipher
+        # https://stackoverflow.com/questions/73144204/base32encode-in-python3-8-compliant-with-rfc2938
+        # base32hexencode/decode 适配更低的python版本（小于3.10）
+        base32_bytes = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='
+        base32hex_bytes = b'0123456789ABCDEFGHIJKLMNOPQRSTUV='
+        self.trans_to_hex = bytes.maketrans(base32_bytes, base32hex_bytes)
+        self.trans_from_hex = bytes.maketrans(base32hex_bytes, base32_bytes)
     
     def standard_encrypt(self, filepath: str) -> str:
         """
@@ -48,7 +54,7 @@ class Name:
             return ''
         padding_num = 8 - len(filename) % 8
         filename = filename + padding_num * '=' # 添加padding
-        filename = base64.b32hexdecode(filename.upper()) # base32解码
+        filename = base64.b32decode(filename.upper().encode('utf-8').translate(self.trans_from_hex)) # base32hex解码
         if len(filename) == 0:
             raise ValueError('too short to decrypt')
         if len(filename) >= 2048:
@@ -60,7 +66,7 @@ class Name:
             return ''
         filename = pad(filename.encode('utf-8'), 16, style = 'pkcs7')
         filename = Encrypt(self.__cipher, self.__nameTweak, filename)
-        return base64.b32hexencode(filename).decode('utf-8').strip('=').lower()
+        return base64.b32encode(filename).translate(self.trans_to_hex).decode('utf-8').strip('=').lower()
     
     def __name_obfuscate_encrypt(self, filename: str) -> str:
         if filename == '':
