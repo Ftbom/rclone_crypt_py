@@ -4,7 +4,7 @@ import hashlib
 from rclone import Crypt
 from rclone.file_cipher import byte_increment, nonce_increment, nonce_add
 
-TEST_FILE_PATH = 'tests/test_files'
+TEST_FILE_PATH = 'test_files'
 
 crypt_with_passwd2 = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 crypt_without_passwd2 = Crypt('Z2rCKxxvrm6pQMW')

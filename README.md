@@ -1,6 +1,6 @@
 # rclone_crypt_py
 
-[简体中文](README.md), [English](README-en.md)
+[简体中文](https://github.com/Ftbom/rclone_crypt_py/blob/main/README.md), [English](https://github.com/Ftbom/rclone_crypt_py/blob/main/README-en.md)
 
 python实现的针对rclone(crypt storage)的加密/解密
 
