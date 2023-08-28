@@ -76,12 +76,12 @@ class File:
         # 读取文件块
         # 16为头
         # 64kb数据
-        input_bytes = input_file.read(BLOCKDATA_SIZE + BLOCKHEADER_SIZE)
+        input_bytes = input_file.read((BLOCKDATA_SIZE + BLOCKHEADER_SIZE) * 10)
         try:
             while (input_bytes):
-                output_file.write(self.__box.decrypt(input_bytes, Nonce))
-                Nonce = nonce_increment(Nonce)
-                input_bytes = input_file.read(BLOCKDATA_SIZE + BLOCKHEADER_SIZE)
+                output_file.write(self.bytes_decrypt(input_bytes, Nonce))
+                Nonce = nonce_add(Nonce, 10)
+                input_bytes = input_file.read((BLOCKDATA_SIZE + BLOCKHEADER_SIZE) * 10)
         except:
             input_file.close()
             output_file.close()
@@ -109,13 +109,13 @@ class File:
         Nonce = nacl.utils.random(FILENONCE_SIZE) # 生成nonce
         output_file.write(Nonce)
         # 读取文件块
-        # 64kb数据
-        input_bytes = input_file.read(BLOCKDATA_SIZE)
+        # 10 * 64kb数据
+        input_bytes = input_file.read(BLOCKDATA_SIZE * 10)
         try:
             while (input_bytes):
-                output_file.write(self.__box.encrypt(input_bytes, Nonce).ciphertext)
-                Nonce = nonce_increment(Nonce)
-                input_bytes = input_file.read(BLOCKDATA_SIZE)
+                output_file.write(self.bytes_encrypt(input_bytes, Nonce))
+                Nonce = nonce_add(Nonce, 10)
+                input_bytes = input_file.read(BLOCKDATA_SIZE * 10)
         except:
             input_file.close()
             output_file.close()
@@ -123,7 +123,7 @@ class File:
         input_file.close()
         output_file.close()
 
-    def bytes_decrypt(self, input_bytes: bytes, nonce: bytes, block_offset: int = 1) -> bytes:
+    def bytes_decrypt(self, input_bytes: bytes, nonce: bytes, block_offset: int = 0) -> bytes:
         """
         bytes解密
         :param `input_bytes`: 输入bytes
@@ -148,7 +148,7 @@ class File:
             raise ValueError('failed to decrypt bytes')
         return output_bytes
 
-    def bytes_encrypt(self, input_bytes: bytes, nonce: bytes, block_offset: int = 1) -> bytes:
+    def bytes_encrypt(self, input_bytes: bytes, nonce: bytes, block_offset: int = 0) -> bytes:
         """
         bytes加密
         :param `input_bytes`: 输入bytes

@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding = 'utf-8') as f:
 
 setuptools.setup(
     name = 'rclone-crypt',
-    version = '1.0.1',
+    version = '1.1.0',
     license = 'MIT',
     description = 'Python implementation of encryption/decryption for rclone (crypt storage)',
     long_description = long_description,
