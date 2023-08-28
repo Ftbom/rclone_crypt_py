@@ -1,4 +1,4 @@
-from rclone import passwd_deobscure
+from src.rclone import passwd_deobscure
 
 def test_passwd_obscure():
     assert passwd_deobscure(b'') == b''

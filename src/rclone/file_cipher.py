@@ -65,9 +65,12 @@ class File:
         try:
             output_file = open(output_file_path, 'wb')
         except:
+            input_file.close()
             raise ValueError('failed to write output file')
         # 读取头
         if not input_file.read(FILEMAGIC_SIZE) == b'RCLONE\x00\x00': # 标准头
+            input_file.close()
+            output_file.close()
             raise ValueError('not encrypted rclone file')
         Nonce = input_file.read(FILENONCE_SIZE)
         # 读取文件块
@@ -80,6 +83,8 @@ class File:
                 Nonce = nonce_increment(Nonce)
                 input_bytes = input_file.read(BLOCKDATA_SIZE + BLOCKHEADER_SIZE)
         except:
+            input_file.close()
+            output_file.close()
             raise RuntimeError('failed to decrypt file')
         input_file.close()
         output_file.close()
@@ -97,6 +102,7 @@ class File:
         try:
             output_file = open(output_file_path, 'wb')
         except:
+            input_file.close()
             raise ValueError('failed to write output file')
         # 写入头
         output_file.write(b'RCLONE\x00\x00') # 标准头
@@ -111,6 +117,8 @@ class File:
                 Nonce = nonce_increment(Nonce)
                 input_bytes = input_file.read(BLOCKDATA_SIZE)
         except:
+            input_file.close()
+            output_file.close()
             raise RuntimeError('failed to encrypt file')
         input_file.close()
         output_file.close()
@@ -120,7 +128,7 @@ class File:
         bytes解密
         :param `input_bytes`: 输入bytes
         :param `nonce`: 用于解密的nonce
-        :param `blockoffset`: input_bytes相对于输入nonce的偏移量
+        :param `blockoffset`: input_bytes相对于输入nonce的偏移
         """
         if input_bytes == b'':
             return b''
@@ -138,4 +146,29 @@ class File:
                 output_bytes = output_bytes + self.__box.decrypt(input_bytes[block_num * block_size :], nonce)
         except:
             raise ValueError('failed to decrypt bytes')
+        return output_bytes
+
+    def bytes_encrypt(self, input_bytes: bytes, nonce: bytes, block_offset: int = 1) -> bytes:
+        """
+        bytes加密
+        :param `input_bytes`: 输入bytes
+        :param `nonce`: 用于加密的nonce，24位
+        :param `blockoffset`: input_bytes相对于输入nonce的偏移
+        """
+        if input_bytes == b'':
+            return b''
+        output_bytes = b''
+        block_size = BLOCKDATA_SIZE # 文件块大小
+        nonce = nonce_add(nonce, block_offset) # 根据初始文件块偏移位，调整nonce
+        block_num = len(input_bytes) // block_size
+        bytes_remain = len(input_bytes) % block_size
+        try:
+            for i in range(block_num):
+                pos = i * block_size
+                output_bytes = output_bytes + self.__box.encrypt(input_bytes[pos : pos + block_size], nonce).ciphertext
+                nonce = nonce_increment(nonce)
+            if not bytes_remain == 0:
+                output_bytes = output_bytes + self.__box.encrypt(input_bytes[block_num * block_size :], nonce).ciphertext
+        except:
+            raise ValueError('failed to encrypt bytes')
         return output_bytes

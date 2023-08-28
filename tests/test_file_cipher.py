@@ -1,10 +1,10 @@
 import os
 import pytest
 import hashlib
-from rclone import Crypt
-from rclone.file_cipher import byte_increment, nonce_increment, nonce_add
+from src.rclone import Crypt
+from src.rclone.file_cipher import byte_increment, nonce_increment, nonce_add
 
-TEST_FILE_PATH = 'test_files'
+TEST_FILE_PATH = 'tests/test_files'
 
 crypt_with_passwd2 = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 crypt_without_passwd2 = Crypt('Z2rCKxxvrm6pQMW')
@@ -104,3 +104,31 @@ def test_bytes_decrypt_obscure():
         encrypted_data_without_passwd2 = f.read()
     assert origin_data == crypt_with_passwd2_obscure.File.bytes_decrypt(encrypted_data_with_passwd2, nonce_with_passwd2, 0)
     assert origin_data == crypt_without_passwd2_obscure.File.bytes_decrypt(encrypted_data_without_passwd2, nonce_without_passwd2, 0)
+
+def test_bytes_encrypt():
+    with open(f'{TEST_FILE_PATH}/origin_file', 'rb') as f:
+        origin_data = f.read()
+    with open(f'{TEST_FILE_PATH}/rclone_encrypted_with_passwd2', 'rb') as f:
+        f.seek(8)
+        nonce_with_passwd2 = f.read(24)
+        encrypted_data_with_passwd2 = f.read()
+    with open(f'{TEST_FILE_PATH}/rclone_encrypted_without_passwd2', 'rb') as f:
+        f.seek(8)
+        nonce_without_passwd2 = f.read(24)
+        encrypted_data_without_passwd2 = f.read()
+    assert encrypted_data_with_passwd2 == crypt_with_passwd2.File.bytes_encrypt(origin_data, nonce_with_passwd2, 0)
+    assert encrypted_data_without_passwd2 == crypt_without_passwd2.File.bytes_encrypt(origin_data, nonce_without_passwd2, 0)
+
+def test_bytes_encrypt_obscure():
+    with open(f'{TEST_FILE_PATH}/origin_file', 'rb') as f:
+        origin_data = f.read()
+    with open(f'{TEST_FILE_PATH}/rclone_encrypted_with_passwd2', 'rb') as f:
+        f.seek(8)
+        nonce_with_passwd2 = f.read(24)
+        encrypted_data_with_passwd2 = f.read()
+    with open(f'{TEST_FILE_PATH}/rclone_encrypted_without_passwd2', 'rb') as f:
+        f.seek(8)
+        nonce_without_passwd2 = f.read(24)
+        encrypted_data_without_passwd2 = f.read()
+    assert encrypted_data_with_passwd2 == crypt_with_passwd2.File.bytes_encrypt(origin_data, nonce_with_passwd2, 0)
+    assert encrypted_data_without_passwd2 == crypt_without_passwd2.File.bytes_encrypt(origin_data, nonce_without_passwd2, 0)

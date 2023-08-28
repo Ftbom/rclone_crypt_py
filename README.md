@@ -33,14 +33,28 @@ crypt.Name.standard_decrypt('tj0ivgsmd9vh4ccfov7f739in0/lb8g1ak1849smj6mlmpv2c5a
 ```
 
 ```python
-# bytes解密
 from rclone import Crypt
 crypt = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 
-with open('D:/Download/test.bin', 'rb') as f:
+# bytes解密
+with open('test.bin', 'rb') as f:
     f.seek(8) # 跳过固定文件头 b'RCLONE\x00\x00'
     init_nonce = f.read(24) # 读取nonce
     f.seek(5 * (1024 * 64 + 16), 1) # 跳过5个数据块
     input_bytes = f.read(10 * (1024 * 64 + 16)) # 读取10个数据块
     output_bytes = crypt.File.bytes_decrypt(input_bytes, init_nonce, 5) # 数据块解密
+
+# bytes加密
+import nacl
+with open('test.bin', 'wb') as f:
+    f.write(b'RCLONE\x00\x00') # 写入标准头
+    init_nonce = nacl.utils.random(24) # 生成随机nonce（24位）
+    f.write(init_nonce) # 写入nonce
+    with open('origin.bin', 'rb') as fl:
+        origin_bytes = fl.read(1024 * 64 * 10) # 读取10个数据块
+        i = 0
+        while origin_bytes:
+            f.write(crypt.File.bytes_encrypt(origin_bytes, init_nonce, i))
+            origin_bytes = fl.read(1024 * 64 * 10)
+            i = i + 10
 ```

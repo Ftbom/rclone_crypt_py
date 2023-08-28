@@ -33,14 +33,28 @@ crypt.Name.standard_decrypt('tj0ivgsmd9vh4ccfov7f739in0/lb8g1ak1849smj6mlmpv2c5a
 ```
 
 ```python
-# bytes decryption
 from rclone import Crypt
 crypt = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 
-with open('D:/Download/test.bin', 'rb') as f:
+# bytes decryption
+with open('test.bin', 'rb') as f:
     f.seek(8) # Skip the fixed file header b'RCLONE\x00\x00'
     init_nonce = f.read(24) # Read the nonce
     f.seek(5 * (1024 * 64 + 16), 1) # Skip 5 data blocks
     input_bytes = f.read(10 * (1024 * 64 + 16)) # Read 10 data blocks
-    output_bytes = crypt.File.bytes_decrypt(input_bytes, init_nonce, 5) # Data block decryption
+    output_bytes = crypt.File.bytes_decrypt(input_bytes, init_nonce, 5) # Decrypt the data blocks
+
+# bytes encryption
+import nacl
+with open('test.bin', 'wb') as f:
+    f.write(b'RCLONE\x00\x00') # Write the standard header
+    init_nonce = nacl.utils.random(24) # Generate a random nonce (24 bits)
+    f.write(init_nonce) # Write the nonce
+    with open('origin.bin', 'rb') as fl:
+        origin_bytes = fl.read(1024 * 64 * 10) # Read 10 data blocks
+        i = 0
+        while origin_bytes:
+            f.write(crypt.File.bytes_encrypt(origin_bytes, init_nonce, i))
+            origin_bytes = fl.read(1024 * 64 * 10)
+            i = i + 10
 ```

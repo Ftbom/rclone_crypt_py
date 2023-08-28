@@ -1,4 +1,4 @@
-from rclone import Crypt
+from src.rclone import Crypt
 
 crypt_with_passwd2 = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 crypt_without_passwd2 = Crypt('Z2rCKxxvrm6pQMW')

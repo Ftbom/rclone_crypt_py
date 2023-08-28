@@ -1,5 +1,5 @@
 import pytest
-from rclone import util
+from src.rclone import util
 
 def test_count_size():
     assert util.count_size(32) == 0
