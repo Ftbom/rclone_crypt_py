@@ -1,28 +1,28 @@
 # rclone_crypt_py
 
-[简体中文](https://github.com/Ftbom/rclone_crypt_py/blob/main/README.md), [English](https://github.com/Ftbom/rclone_crypt_py/blob/main/README-en.md)
+[English](https://github.com/Ftbom/rclone_crypt_py/blob/main/README.md), [简体中文](https://github.com/Ftbom/rclone_crypt_py/blob/main/README-zh.md)
 
-python实现的针对rclone(crypt storage)的加密/解密
+Python implementation of encryption/decryption for rclone (crypt storage)
 
-## 使用
+## Usage
 
 ```python
 from rclone import Crypt
-# 初始化
-# 分别传入passwd1和passwd2
+# Initialize
+# Pass in passwd1 and passwd2
 
-# 此处的passwd是创建crypt时的密码，而不是rclone配置文件中的密码
-# 若未设置passwd2，可省略第二个参数
+# The password here is the password for creating the crypt, not the password in the rclone configuration file
+# If passwd2 is not set, the second parameter can be omitted
 crypt = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 
-# 若直接传入rclone配置文件中的密码（混淆后的密码），需将passwd_obscured参数设为True
+# To use passwords directly in the rclone configuration file(obscured password), you should set the passwd_obscured parameter to True.
 # crypt = Crypt('SpnX0yEFxpNJjo9bxd3xAlVoXA7F4cr3C0SA-zmfzw', 'ziWH7jKYerB6o5vHnaXAvISTguFD6ZFJFbhT3BlLVQ', True)
 
-# 文件加密/解密
+# File encryption/decryption
 crypt.File.file_decrypt(input_file_path, output_file_path)
 crypt.File.file_encrypt(input_file_path, output_file_path)
 
-# 文件路径加密/解密
+# File path encryption/decryption
 # obfuscate
 crypt.Name.obfuscate_encrypt('Hello,Word')
 crypt.Name.obfuscate_decrypt('188.Nkrru,cuxj')
@@ -36,22 +36,22 @@ crypt.Name.standard_decrypt('tj0ivgsmd9vh4ccfov7f739in0/lb8g1ak1849smj6mlmpv2c5a
 from rclone import Crypt
 crypt = Crypt('PvrhK9lOaJMdJO2', 'bjnW66SNkUuV4hX')
 
-# bytes解密
+# bytes decryption
 with open('test.bin', 'rb') as f:
-    f.seek(8) # 跳过固定文件头 b'RCLONE\x00\x00'
-    init_nonce = f.read(24) # 读取nonce
-    f.seek(5 * (1024 * 64 + 16), 1) # 跳过5个数据块
-    input_bytes = f.read(10 * (1024 * 64 + 16)) # 读取10个数据块
-    output_bytes = crypt.File.bytes_decrypt(input_bytes, init_nonce, 5) # 数据块解密
+    f.seek(8) # Skip the fixed file header b'RCLONE\x00\x00'
+    init_nonce = f.read(24) # Read the nonce
+    f.seek(5 * (1024 * 64 + 16), 1) # Skip 5 data blocks
+    input_bytes = f.read(10 * (1024 * 64 + 16)) # Read 10 data blocks
+    output_bytes = crypt.File.bytes_decrypt(input_bytes, init_nonce, 5) # Decrypt the data blocks
 
-# bytes加密
+# bytes encryption
 import nacl
 with open('test.bin', 'wb') as f:
-    f.write(b'RCLONE\x00\x00') # 写入标准头
-    init_nonce = nacl.utils.random(24) # 生成随机nonce（24位）
-    f.write(init_nonce) # 写入nonce
+    f.write(b'RCLONE\x00\x00') # Write the standard header
+    init_nonce = nacl.utils.random(24) # Generate a random nonce (24 bits)
+    f.write(init_nonce) # Write the nonce
     with open('origin.bin', 'rb') as fl:
-        origin_bytes = fl.read(1024 * 64 * 10) # 读取10个数据块
+        origin_bytes = fl.read(1024 * 64 * 10) # Read 10 data blocks
         i = 0
         while origin_bytes:
             f.write(crypt.File.bytes_encrypt(origin_bytes, init_nonce, i))
