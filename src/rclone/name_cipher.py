@@ -139,7 +139,7 @@ class Name:
                 inQuote = True
             elif code >= ord('0') and code <= ord('9'):
                 thisdir = (dir_ % 9) + 1
-                newRune = ord('0') + code - '0' - thisdir
+                newRune = ord('0') + code - ord('0') - thisdir
                 if newRune < ord('0'):
                     newRune = newRune + 10
                 out_filename = out_filename + chr(newRune)
