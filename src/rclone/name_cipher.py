@@ -53,7 +53,8 @@ class Name:
         if filename == '':
             return ''
         padding_num = 8 - len(filename) % 8
-        filename = filename + padding_num * '=' # 添加padding
+        if padding_num != 8:
+            filename = filename + padding_num * '=' # 添加padding
         filename = base64.b32decode(filename.upper().encode('utf-8').translate(self.trans_from_hex)) # base32hex解码
         if len(filename) == 0:
             raise ValueError('too short to decrypt')
