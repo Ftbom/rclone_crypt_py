@@ -11,6 +11,14 @@ def test_count_size():
     with pytest.raises(ValueError):
         util.count_size(48)
 
+def test_count_encrypted_size():
+    assert util.count_size(0) == 32
+    assert util.count_size(5384) == 5432
+    assert util.count_size(4110900) == 4111940
+    assert util.count_size(1688666895) == 1689079215
+    with pytest.raises(ValueError):
+        util.count_size(-1)
+
 def test_count_pos():
     assert util.count_pos(0) == 32
     assert util.count_pos(1) == 32

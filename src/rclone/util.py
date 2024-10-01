@@ -1,4 +1,4 @@
-FILEMAGIC_SIZE = 8  # 文化magic大小
+FILEMAGIC_SIZE = 8  # 文件magic大小
 FILENONCE_SIZE = 24 # nonce大小
 BLOCKHEADER_SIZE = 16 # 文件块头大小
 BLOCKDATA_SIZE = 64 * 1024 # 文件块数据大小
@@ -18,6 +18,17 @@ def count_size(size: int) -> int:
     if remain_size <= BLOCKHEADER_SIZE:
         raise ValueError('not encrypted rclone file')
     return block_num * BLOCKDATA_SIZE + remain_size - BLOCKHEADER_SIZE
+
+def count_encrypted_size(size: int) -> int:
+    """
+    计算加密后文件大小
+    :param `size`: 加密前文件大小
+    """
+    if size < 0:
+        raise ValueError('file size error')
+    size = size + (size + (BLOCKDATA_SIZE - 1)) // (BLOCKDATA_SIZE) * BLOCKHEADER_SIZE
+    size = size + FILEMAGIC_SIZE + FILENONCE_SIZE
+    return size
 
 def count_pos(pos: int, round_forward: bool = True) -> int:
     """
