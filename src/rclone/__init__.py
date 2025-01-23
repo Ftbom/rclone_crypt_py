@@ -31,8 +31,9 @@ class Crypt:
     :param `passwd`: 密码, 对应rclone password
     :param `salt`: 对应rclone password2, 可不设
     :param `passwd_obscured`: 密码是否经过混淆
+    :param `name_encoding`: 'base32'|'base64'|'base32768'
     """
-    def __init__(self, passwd: str, salt: str = DEFAULT_SALT, passwd_obscured: bool = False) -> None:
+    def __init__(self, passwd: str, salt: str = DEFAULT_SALT, passwd_obscured: bool = False, name_encoding: str = 'base32') -> None:
         if type(passwd) == str:
             passwd = bytes(passwd, 'utf-8')
         if passwd_obscured:
@@ -47,4 +48,4 @@ class Crypt:
         nameTweak = key[64 :]
         cipher = AES.new(nameKey, AES.MODE_ECB)
         self.File = File(box)
-        self.Name = Name(nameKey, nameTweak, cipher)
+        self.Name = Name(nameKey, nameTweak, cipher, name_encoding)

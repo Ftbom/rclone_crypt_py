@@ -1,7 +1,36 @@
 import base64
+from .base32768 import Base32768Trans
 from .eme import Decrypt, Encrypt
 from Crypto.Util.Padding import unpad, pad
 from Crypto.Cipher._mode_ecb import EcbMode
+
+class Base32Trans:
+    def __init__(self) -> None:
+        # https://stackoverflow.com/questions/73144204/base32encode-in-python3-8-compliant-with-rfc2938
+        # base32hexencode/decode 适配更低的python版本（小于3.10）
+        base32_bytes = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='
+        base32hex_bytes = b'0123456789ABCDEFGHIJKLMNOPQRSTUV='
+        self.__trans_to_hex = bytes.maketrans(base32_bytes, base32hex_bytes)
+        self.__trans_from_hex = bytes.maketrans(base32hex_bytes, base32_bytes)
+
+    def encode(self, s: bytes) -> str:
+        return base64.b32encode(s).translate(self.__trans_to_hex).decode('utf-8').strip('=').lower()
+
+    def decode(self, s: str) -> bytes:
+        padding_num = 8 - len(s) % 8
+        if padding_num != 8:
+            s = s + padding_num * '=' # 添加padding
+        return base64.b32decode(s.upper().encode('utf-8').translate(self.__trans_from_hex))
+
+class Base64Trans:
+    def encode(self, s: bytes) -> str:
+        return base64.urlsafe_b64encode(s).decode('utf-8').strip('=')
+
+    def decode(self, s: str) -> bytes:
+        padding_num = 4 - len(s) % 4
+        if padding_num != 4:
+            s = s + padding_num * '=' # 添加padding
+        return base64.urlsafe_b64decode(s.encode('utf-8'))
 
 class Name:
     """
@@ -10,16 +39,16 @@ class Name:
     :param `nameTweak`: 通过passwd生成的nameTweak
     :param `aes_cipher`: ECB模式的AES Cipher，`AES.new(nameKey, AES.MODE_ECB)`
     """
-    def __init__(self, nameKey: bytes, nameTweak: bytes, aes_cipher: EcbMode) -> None:
+    def __init__(self, nameKey: bytes, nameTweak: bytes, aes_cipher: EcbMode, encoding: str = 'base32') -> None:
         self.__nameKey = nameKey
         self.__nameTweak = nameTweak
         self.__cipher = aes_cipher
-        # https://stackoverflow.com/questions/73144204/base32encode-in-python3-8-compliant-with-rfc2938
-        # base32hexencode/decode 适配更低的python版本（小于3.10）
-        base32_bytes = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='
-        base32hex_bytes = b'0123456789ABCDEFGHIJKLMNOPQRSTUV='
-        self.trans_to_hex = bytes.maketrans(base32_bytes, base32hex_bytes)
-        self.trans_from_hex = bytes.maketrans(base32hex_bytes, base32_bytes)
+        if encoding == 'base32':
+            self.__str_trans = Base32Trans()
+        elif encoding == 'base64':
+            self.__str_trans = Base64Trans()
+        elif encoding == 'base32768':
+            self.__str_trans = Base32768Trans()
     
     def standard_encrypt(self, filepath: str) -> str:
         """
@@ -52,10 +81,7 @@ class Name:
     def __name_standard_decrypt(self, filename: str) -> str:
         if filename == '':
             return ''
-        padding_num = 8 - len(filename) % 8
-        if padding_num != 8:
-            filename = filename + padding_num * '=' # 添加padding
-        filename = base64.b32decode(filename.upper().encode('utf-8').translate(self.trans_from_hex)) # base32hex解码
+        filename = self.__str_trans.decode(filename) # base32hex解码
         if len(filename) == 0:
             raise ValueError('too short to decrypt')
         if len(filename) >= 2048:
@@ -67,7 +93,7 @@ class Name:
             return ''
         filename = pad(filename.encode('utf-8'), 16, style = 'pkcs7')
         filename = Encrypt(self.__cipher, self.__nameTweak, filename)
-        return base64.b32encode(filename).translate(self.trans_to_hex).decode('utf-8').strip('=').lower()
+        return self.__str_trans.encode(filename)
     
     def __name_obfuscate_encrypt(self, filename: str) -> str:
         if filename == '':
